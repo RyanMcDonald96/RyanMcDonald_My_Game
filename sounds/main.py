@@ -1,14 +1,17 @@
 # File created by: Ryan McDonald
 
 # import libraries
-# hi
+# test comment for git
 import pygame as pg
 import random
 import os
 # import settings
 from settings import *
 from sprites import *
+from random import randint
 # from pg.sprite import Sprite
+
+vec = pg.math.Vector2
 
 # set up assets folders
 game_folder = os.path.dirname(__file__)
@@ -19,7 +22,7 @@ def get_mouse_now():
     return (x,y)
 
 
-# init pg and create window
+# init pg and create windowo
 pg.init()
 # init sound mixer
 pg.mixer.init()
@@ -34,6 +37,13 @@ pewpews = pg.sprite.Group()
 # player is instantiated here
 player = Player()
 invader = Mob()
+invader.vel = vec(randint(8,80),randint(8,80))
+
+for i in range(0,10):
+    m = Mob()
+    m.vel = vec(randint(8,80),randint(8,80))
+    all_sprites.add(m)
+    enemies.add(m)
 
 # testSprite = Sprite()
 # testSprite.image = pg.Surface((50,50))
@@ -42,7 +52,7 @@ invader = Mob()
 # testSprite.rect.center = (WIDTH / 2, HEIGHT / 2)
 all_sprites.add(player)
 all_sprites.add(invader)
-# all_sprites.add(testSprite)aa
+# all_sprites.add(testSprite)
 
 # game loop
 
@@ -59,9 +69,9 @@ while RUNNING:
     ### update section of game loop (if updates take longer the 1/30th of a second, you will get laaaaag...)
     all_sprites.update()
 
-    blocks_hit_list = pg.sprite.spritecollide(player, enemies, True)
+    blocks_hit_list = pg.sprite.spritecollide(player, enemies, False)
     for block in blocks_hit_list:
-        # print(enemies)
+        print(enemies)
         pass
     ### draw and render section of game loop
     screen.fill(BLUE)
