@@ -46,8 +46,8 @@ class Player(Sprite):
         self.rect.x += 1
         hits = pg.sprite.spritecollide(self, self.game.platforms, False)
         self.rect.x -= 1
-        if hits:
-            self.vel.y = -PLAYER_JUMP
+        # if hits:
+        self.vel.y = -PLAYER_JUMP
     
     def inbounds(self):
         if self.rect.x > WIDTH - 50:
@@ -77,7 +77,7 @@ class Player(Sprite):
         self.rect.midbottom = self.pos
 
 class Mob(Sprite):
-    def __init__(self,width,height,color):
+    def __init__(self,width,height, color):
         Sprite.__init__(self)
         self.width = width
         self.height = height
@@ -85,8 +85,8 @@ class Mob(Sprite):
         self.color = color
         self.image.fill(self.color)
         self.rect = self.image.get_rect()
-        # self.rect.center = (100, 100)
-        self.pos = vec(100, 200)
+        self.rect.center = (WIDTH/2, HEIGHT/2)
+        self.pos = vec(WIDTH/2, HEIGHT/2)
         self.vel = vec(randint(1,5),randint(1,5))
         self.acc = vec(1,1)
         self.cofric = 0.01
