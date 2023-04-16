@@ -7,6 +7,8 @@ import os
 # import settings 
 from settings import *
 from sprites import *
+from math import *
+from math import ceil
 # from pg.sprite import Sprite
 
 # set up assets folders
@@ -14,6 +16,18 @@ game_folder = os.path.dirname(__file__)
 img_folder = os.path.join(game_folder, "img")
 
 # create game class in order to pass properties to the sprites file
+
+class Cooldown():
+    def __init__(self):
+        self.current_time = 0
+        self.event_time = 0
+        self.delta = 0
+    def ticking(self):
+        self.current_time = floor((pg.time.get_ticks())/1000)
+        self.delta = self.current_time - self.event_time
+        # print(self.delta)
+    def timer(self):
+        self.current_time = floor((pg.time.get_ticks())/1000)
 
 class Game:
     def __init__(self):
@@ -27,7 +41,8 @@ class Game:
         print(self.screen)
     def new(self):
         # starting a new game
-        self.score = 0
+        self.score = 40
+        self.cd = Cooldown()
         self.all_sprites = pg.sprite.Group()
         self.platforms = pg.sprite.Group()
         self.enemies = pg.sprite.Group()
@@ -47,6 +62,7 @@ class Game:
             m = Mob(20,20,(0,255,0))
             self.all_sprites.add(m)
             self.enemies.add(m)
+            self.cd.timer()
         self.run()
     def run(self):
         self.playing = True
@@ -55,7 +71,6 @@ class Game:
             self.events()
             self.update()
             self.draw()
-    
     def events(self):
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -67,6 +82,24 @@ class Game:
                     self.player.jump()
     def update(self):
         self.all_sprites.update()
+        self.cd.ticking()
+        if self.cd.delta > 10:
+            # when the timer goes above 10 seconds you either know if you won or not
+            self.win = self.score > 0
+            print ("YOU WIN")
+            # score starts at 100 and if you are above 0 you win
+        if self.cd.delta > 10:
+            self.lose = self.score < 0
+            print ("YOU LOSE")
+            # score starts at 100 and if you are below 0 you lose
+        mhits = pg.sprite.spritecollide(self.player, self.enemies, False)
+        if mhits:
+            self.score -= 1
+            print(self.score)
+            if abs(self.player.vel.x) > abs(self.player.vel.y):
+                self.player.vel.x *= -1
+            else:
+                self.player.vel.y *= -1
         if self.player.vel.y > 0:
             hits = pg.sprite.spritecollide(self.player, self.platforms, False)
             if hits:
@@ -78,12 +111,16 @@ class Game:
                 else:
                     self.player.pos.y = hits[0].rect.top
                     self.player.vel.y = 0
-
     def draw(self):
         self.screen.fill(BLUE)
-        self.draw_text("hello there...", 24, WHITE, WIDTH/2, HEIGHT/2)
         self.all_sprites.draw(self.screen)
-
+        self.draw_text(str(self.cd.delta), 24, WHITE, 50, 50)
+        if self.cd.delta > 10:
+            if self.score > 0:
+                self.draw_text("YOU WIN!!", 24, WHITE, WIDTH/2, WIDTH/2)
+            else:
+                self.score < 0
+                self.draw_text("YOU LOSE!!", 24, WHITE, WIDTH/2, WIDTH/2)
         # is this a method or a function?
         pg.display.flip()
     def draw_text(self, text, size, color, x, y):
