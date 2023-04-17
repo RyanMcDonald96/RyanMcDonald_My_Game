@@ -1,33 +1,25 @@
 # File created by: Ryan McDonald
 # Repush
 # import libraries
-# test comment for git
 import pygame as pg
 import os
 # import settings 
 from settings import *
 from sprites import *
-from math import *
-from math import ceil
-# from pg.sprite import Sprite
+from os import path
+import sys
+from time import sleep
 
 # set up assets folders
 game_folder = os.path.dirname(__file__)
 img_folder = os.path.join(game_folder, "img")
 
-# create game class in order to pass properties to the sprites file
-
-class Cooldown():
-    def __init__(self):
-        self.current_time = 0
-        self.event_time = 0
-        self.delta = 0
-    def ticking(self):
-        self.current_time = floor((pg.time.get_ticks())/1000)
-        self.delta = self.current_time - self.event_time
-        # print(self.delta)
-    def timer(self):
-        self.current_time = floor((pg.time.get_ticks())/1000)
+def draw_text(screen, text, size, x, y, color):
+    font = pg.font.Font(None, size)
+    text_surface = font.render(text, True, color)
+    text_rect = text_surface.get_rect()
+    text_rect.midtop = (x, y)
+    screen.blit(text_surface, text_rect)
 
 class Game:
     def __init__(self):
@@ -41,28 +33,32 @@ class Game:
         print(self.screen)
     def new(self):
         # starting a new game
-        self.score = 40
-        self.cd = Cooldown()
+        # self.load_data()
+        self.score = 0
         self.all_sprites = pg.sprite.Group()
+        self.coins = pg.sprite.Group()
         self.platforms = pg.sprite.Group()
         self.enemies = pg.sprite.Group()
         self.player = Player(self)
         self.plat1 = Platform(WIDTH, 50, 0, HEIGHT-50, (150,150,150), "normal")
-        # self.plat1 = Platform(WIDTH, 50, 0, HEIGHT-50, (150,150,150), "normal")
         self.all_sprites.add(self.plat1)
 
         self.platforms.add(self.plat1)
-        
+       
         self.all_sprites.add(self.player)
         for plat in PLATFORM_LIST:
-            p = Platform(*plat)
+            if len(plat) == 6:
+                p = Platform(*plat)
+            # add the moving platform
+            elif len(plat) == 7:
+                p = MovingPlatform(*plat)
             self.all_sprites.add(p)
             self.platforms.add(p)
+        # add all mobs
         for i in range(0,10):
             m = Mob(20,20,(0,255,0))
             self.all_sprites.add(m)
             self.enemies.add(m)
-            self.cd.timer()
         self.run()
     def run(self):
         self.playing = True
@@ -71,6 +67,7 @@ class Game:
             self.events()
             self.update()
             self.draw()
+    
     def events(self):
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -80,26 +77,22 @@ class Game:
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_SPACE:
                     self.player.jump()
+    # draws health bar
+    def draw_health(self):
+        # draws the health bar as a percentage of players health--see sources
+        health_percentage = self.player.health / PLAYER_MAX_HEALTH
+        health_width = int(health_percentage * 200)
+        health_bar = pg.Rect(20, 20, health_width, 20)
+        pg.draw.rect(self.screen, RED, health_bar)
+        pg.draw.rect(self.screen, WHITE, (20, 20, 200, 20), 2)
     def update(self):
         self.all_sprites.update()
-        self.cd.ticking()
-        if self.cd.delta > 10:
-            # when the timer goes above 10 seconds you either know if you won or not
-            self.win = self.score > 0
-            print ("YOU WIN")
-            # score starts at 100 and if you are above 0 you win
-        if self.cd.delta > 10:
-            self.lose = self.score < 0
-            print ("YOU LOSE")
-            # score starts at 100 and if you are below 0 you lose
-        mhits = pg.sprite.spritecollide(self.player, self.enemies, False)
-        if mhits:
-            self.score -= 1
-            print(self.score)
-            if abs(self.player.vel.x) > abs(self.player.vel.y):
-                self.player.vel.x *= -1
-            else:
-                self.player.vel.y *= -1
+        # if the player hits a score of ten, they will gain the invicible powerup
+        if self.score == 10:
+            self.player.invincible = True
+            self.player.invincible_time = 5 * FPS
+            self.player.image.fill(RED)
+            PLAYER_ACC = 4
         if self.player.vel.y > 0:
             hits = pg.sprite.spritecollide(self.player, self.platforms, False)
             if hits:
@@ -111,18 +104,26 @@ class Game:
                 else:
                     self.player.pos.y = hits[0].rect.top
                     self.player.vel.y = 0
+        # if players health hits zero
+        if self.player.health <= 0:
+            # render "Game Over" text aon the screen
+            draw_text(self.screen, "Game Over", 50, WIDTH / 2, HEIGHT / 2, RED)
+            pg.display.flip()
+            # pause the game for 2 seconds
+            sleep(2)
+            # close the window
+            pg.quit()
+            sys.exit()
+    
     def draw(self):
         self.screen.fill(BLUE)
         self.all_sprites.draw(self.screen)
-        self.draw_text(str(self.cd.delta), 24, WHITE, 50, 50)
-        if self.cd.delta > 10:
-            if self.score > 0:
-                self.draw_text("YOU WIN!!", 24, WHITE, WIDTH/2, WIDTH/2)
-            else:
-                self.score < 0
-                self.draw_text("YOU LOSE!!", 24, WHITE, WIDTH/2, WIDTH/2)
-        # is this a method or a function?
+        # draw the score
+        self.draw_text(f"Score: {self.score}", 22, WHITE, WIDTH // 2, 10)
+        self.draw_health()
         pg.display.flip()
+    
+    # sets up draw text method
     def draw_text(self, text, size, color, x, y):
         font_name = pg.font.match_font('arial')
         font = pg.font.Font(font_name, size)
@@ -130,14 +131,12 @@ class Game:
         text_rect = text_surface.get_rect()
         text_rect.midtop = (x,y)
         self.screen.blit(text_surface, text_rect)
-    def get_mouse_now(self):
-        x,y = pg.mouse.get_pos()
-        return (x,y)
+    
 
-# instantiate the game class...
+# instantiate the game class
 g = Game()
 
-# kick off the game loop
+# start game loop
 while g.running:
     g.new()
 
