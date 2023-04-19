@@ -1,4 +1,7 @@
 # File created by: Ryan McDonald
+    # Credit
+        # Nolan Agah
+        # Krisjan Harnish
 # Repush
 # import libraries
 import pygame as pg
@@ -12,7 +15,6 @@ from time import sleep
 
 # set up assets folders
 game_folder = os.path.dirname(__file__)
-img_folder = os.path.join(game_folder, "img")
 
 def draw_text(screen, text, size, x, y, color):
     font = pg.font.Font(None, size)
@@ -87,12 +89,6 @@ class Game:
         pg.draw.rect(self.screen, WHITE, (20, 20, 200, 20), 2)
     def update(self):
         self.all_sprites.update()
-        # if the player hits a score of ten, they will gain the invicible powerup
-        if self.score == 10:
-            self.player.invincible = True
-            self.player.invincible_time = 5 * FPS
-            self.player.image.fill(RED)
-            PLAYER_ACC = 4
         if self.player.vel.y > 0:
             hits = pg.sprite.spritecollide(self.player, self.platforms, False)
             if hits:
