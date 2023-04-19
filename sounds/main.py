@@ -107,11 +107,11 @@ class Game:
         # if players health hits zero
         if self.player.health <= 0:
             # render "Game Over" text aon the screen
-            draw_text(self.screen, "Game Over", 50, WIDTH / 2, HEIGHT / 2, RED)
+            draw_text(self.screen, "You Lose ", 50, WIDTH / 2, HEIGHT / 2, RED)
             pg.display.flip()
             # pause the game for 2 seconds
             sleep(2)
-            # close the window
+            # c the window
             pg.quit()
             sys.exit()
     

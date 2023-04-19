@@ -64,7 +64,7 @@ class Player(Sprite):
         if hits:
             # if the player is not invincible, then they will lose 10 health everytime they collide with mob
             if not self.invincible:
-                print("you collided with an enemy...")
+                print("you hit enemy...")
                 self.game.player.health -= 10
                 if self.game.player.health < 0:
                     self.game.player.health = 0
