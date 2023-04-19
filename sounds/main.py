@@ -85,7 +85,7 @@ class Game:
         health_percentage = self.player.health / PLAYER_MAX_HEALTH
         health_width = int(health_percentage * 200)
         health_bar = pg.Rect(20, 20, health_width, 20)
-        pg.draw.rect(self.screen, RED, health_bar)
+        pg.draw.rect(self.screen, GREEN, health_bar)
         pg.draw.rect(self.screen, WHITE, (20, 20, 200, 20), 2)
     def update(self):
         self.all_sprites.update()
