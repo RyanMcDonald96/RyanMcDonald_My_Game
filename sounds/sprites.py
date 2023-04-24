@@ -10,46 +10,58 @@ import random
 vec = pg.math.Vector2
 
 # player class
-
 class Player(Sprite):
     def __init__(self, game):
         Sprite.__init__(self)
         # these are the properties
         self.game = game
         self.image = pg.Surface((50,50))
+        # makes the screen black 
         self.image.fill(BLACK)
         self.rect = self.image.get_rect()
+        # set the position of the player sprite
         self.rect.center = (WIDTH/2, HEIGHT/2)
+        # set the position of the player sprite as a 2D vector
         self.pos = vec(WIDTH/2, HEIGHT/2)
+        # set the velocity of the player sprite as a 2D vector
         self.vel = vec(0,0)
+        # set the acceleration of the player sprite as a 2D vector
         self.acc = vec(0,0)
+        # set the coefficient of friction for the player
+
         self.cofric = 0.1
         self.canjump = False
+        # players max health
         self.health = PLAYER_MAX_HEALTH
         self.invincible = False
         self.invincible_time = 0
     def input(self):
+        # Get the state of all keyboard keys
         keystate = pg.key.get_pressed()
-        # if keystate[pg.K_w]:
-        #     self.acc.y = -PLAYER_ACC
+        # If the "a" key is pressed, set the player's x acceleration to the left
         if keystate[pg.K_a]:
             self.acc.x = -PLAYER_ACC
-        # if keystate[pg.K_s]:
-        #     self.acc.y = PLAYER_ACC
         if keystate[pg.K_d]:
             self.acc.x = PLAYER_ACC
         
     def jump(self):
+        # Move the player rect to the right and check for collisions with platforms
         self.rect.x += 1
         hits = pg.sprite.spritecollide(self, self.game.platforms, False)
+        # Move the player rect back to its original position
         self.rect.x -= 1
+        # If the player collides with a platform, make them jump by setting their vertical velocity to a negative value
         if hits:
             self.vel.y = -PLAYER_JUMP
  
     def inbounds(self):
+        # 
         if self.rect.x > WIDTH - 50:
+            # 
             self.pos.x = WIDTH - 25
+            # 
             self.vel.x = 0
+            # 
             print("i am off the right side of the screen...")
         if self.rect.x < 0:
             self.pos.x = 25
@@ -60,23 +72,34 @@ class Player(Sprite):
         if self.rect.y < 0:
             print("i am off the top of the screen...")
     def mob_collide(self):
+        # 
         hits = pg.sprite.spritecollide(self, self.game.enemies, True)
+        # 
         if hits:
             # if the player is not invincible, then they will lose 10 health everytime they collide with mob
             if not self.invincible:
+                # 
                 print("you have been attacked!...")
+                # 
                 self.game.player.health -= 10
                 if self.game.player.health < 0:
                     self.game.player.health = 0
 
 
     def update(self):
+        # set acceleration due to gravity
         self.acc = vec(0, PLAYER_GRAV)
+        # check for collision with mobs
         self.mob_collide()
+        # set friction in the x direction
         self.acc.x = self.vel.x * PLAYER_FRICTION
+        # handle user input
         self.input()
+        # update the velocity
         self.vel += self.acc
+        # update the position using kinematic equations
         self.pos += self.vel + 0.5 * self.acc
+        # update the rectangle position
         self.rect.midbottom = self.pos
         if self.invincible_time > 0:
             self.invincible_time -= 1

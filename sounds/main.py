@@ -15,7 +15,7 @@ from time import sleep
 
 # set up assets folders
 game_folder = os.path.dirname(__file__)
-
+# The purpose of the function is to render text onto a Pygame screen using the specified font size, position, and color.
 def draw_text(screen, text, size, x, y, color):
     font = pg.font.Font(None, size)
     text_surface = font.render(text, True, color)
@@ -37,37 +37,55 @@ class Game:
         # starting a new game
         # self.load_data()
         self.score = 0
+        # reate an empty sprite group for all game sprites
         self.all_sprites = pg.sprite.Group()
-        self.coins = pg.sprite.Group()
+        # create an empty sprite group for platforms
         self.platforms = pg.sprite.Group()
+        # create an empty sprite group for platforms
         self.enemies = pg.sprite.Group()
+        # # create an empty sprite group for enemies
         self.player = Player(self)
+        
         self.plat1 = Platform(WIDTH, 50, 0, HEIGHT-50, (150,150,150), "normal")
         self.all_sprites.add(self.plat1)
 
         self.platforms.add(self.plat1)
-       
+
+    # add the player sprite to the all_sprites group
         self.all_sprites.add(self.player)
+        # iterate over a list of platform definitions
         for plat in PLATFORM_LIST:
             if len(plat) == 6:
+                # create a new platform object
                 p = Platform(*plat)
             # add the moving platform
             elif len(plat) == 7:
                 p = MovingPlatform(*plat)
+            # add the platform sprite to the all_sprites group
             self.all_sprites.add(p)
+            # add the platform sprite to the platforms group
             self.platforms.add(p)
         # add all mobs
         for i in range(0,10):
+             # create a new Mob object
             m = Mob(20,20,(0,255,0))
+            # add the mob sprite to the all_sprites group
             self.all_sprites.add(m)
+            # add the mob sprite to the enemies group
             self.enemies.add(m)
+        # start the game loop
         self.run()
     def run(self):
+        # set playing to True to start the game loop
         self.playing = True
         while self.playing:
+            # limit the frame rate to the specified FPS
             self.clock.tick(FPS)
+            # handle events such as key presses and window close events
             self.events()
+            # update the game state
             self.update()
+            # draw the game on the screen
             self.draw()
     
     def events(self):
@@ -114,7 +132,7 @@ class Game:
     def draw(self):
         self.screen.fill(BLUE)
         self.all_sprites.draw(self.screen)
-        # draw the score
+        # draw the 
         self.draw_text(f"Score: {self.score}", 22, WHITE, WIDTH // 2, 10)
         self.draw_health()
         pg.display.flip()
